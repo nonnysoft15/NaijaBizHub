@@ -1,63 +1,582 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NaijaBizHub — Discover Local Businesses</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NaijaBizHub - Discover Local Businesses</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-:root{--navy:#071b35;--green:#087443;--gold:#f5b942;--bg:#f5f7fb;--text:#172033;--muted:#667085}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-header{background:var(--navy);color:#fff}.nav,.container{max-width:1180px;margin:auto}.nav{padding:16px 20px;display:flex;align-items:center;gap:20px}.logo{font-size:22px;font-weight:800;margin-right:auto}.logo span{color:var(--gold)}
-nav button{background:none;border:0;color:#fff;margin-left:10px;cursor:pointer}.hero{background:linear-gradient(120deg,#071b35,#075d43);color:#fff;padding:70px 20px}.hero h1{font-size:46px;max-width:700px;margin:0 0 15px}.hero p{font-size:18px;max-width:650px;color:#dbe7e2}
-.search{background:#fff;padding:10px;border-radius:14px;display:flex;gap:8px;max-width:850px;margin-top:25px}.search input,.search select{flex:1;border:0;padding:14px;outline:0}
-.section{padding:42px 20px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.card,.panel{background:#fff;border-radius:16px;padding:20px;box-shadow:0 5px 22px #0b1c2b0c}.card h3{margin:8px 0}.muted{color:var(--muted)}.tag{display:inline-block;background:#e8f6ef;color:#087443;border-radius:20px;padding:5px 9px;font-size:12px}
-.btn{border:0;border-radius:10px;padding:13px 18px;font-weight:700;cursor:pointer}.primary{background:var(--green);color:#fff}.gold{background:var(--gold);color:#201600}
-.screen{display:none}.screen.active{display:block}.form{max-width:720px}.field{margin:15px 0}.field label{display:block;font-weight:700;margin-bottom:6px}.field input,.field textarea,.field select{width:100%;padding:13px;border:1px solid #d7dce5;border-radius:9px}.two,.stats{display:grid;grid-template-columns:1fr 1fr;gap:15px}.stats{grid-template-columns:repeat(4,1fr)}.stat strong{font-size:27px;display:block;margin-top:5px}.notice{padding:14px;border-radius:10px;background:#edf7f1;color:#075f39;margin:15px 0}.hidden{display:none}
-@media(max-width:800px){.grid,.stats{grid-template-columns:1fr 1fr}.hero h1{font-size:34px}.search,.nav{flex-wrap:wrap}.two{grid-template-columns:1fr}}
-@media(max-width:520px){.grid,.stats{grid-template-columns:1fr}}
-</style></head>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f7f6;
+  color:#17211b
+}
+header{
+  background:#071b35;
+  color:white;
+  padding:15px 20px;
+  position:sticky;
+  top:0;
+  z-index:10
+}
+.nav{
+  max-width:1100px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  gap:20px;
+  flex-wrap:wrap
+}
+.logo{
+  font-size:24px;
+  font-weight:bold;
+  margin-right:auto
+}
+.logo span{color:#f5b942}
+nav button{
+  background:none;
+  border:0;
+  color:white;
+  padding:8px;
+  font-size:15px;
+  cursor:pointer
+}
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:25px 20px
+}
+.hero{
+  background:#087443;
+  color:white;
+  padding:55px 25px;
+  text-align:center
+}
+.hero h1{font-size:38px;margin:10px 0}
+.search{
+  max-width:650px;
+  margin:20px auto;
+  display:flex;
+  gap:10px
+}
+.search input{
+  flex:1;
+  padding:14px;
+  border:0;
+  border-radius:10px;
+  font-size:16px
+}
+.btn{
+  border:0;
+  border-radius:10px;
+  padding:13px 18px;
+  font-weight:bold;
+  cursor:pointer
+}
+.primary{
+  background:#f5b942;
+  color:#071b35
+}
+.section{padding:30px 20px}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:18px
+}
+.card{
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  box-shadow:0 2px 10px #0001
+}
+.card h3{margin-top:0}
+.muted{color:#66736c}
+.form{
+  max-width:700px;
+  margin:auto;
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 2px 10px #0001
+}
+.field{margin-bottom:15px}
+.field label{
+  display:block;
+  margin-bottom:6px;
+  font-weight:bold
+}
+.field input,
+.field textarea,
+.field select{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccd5d0;
+  border-radius:8px;
+  font-size:15px
+}
+.field textarea{min-height:100px}
+.screen{display:none}
+.screen.active{display:block}
+.message{
+  margin:15px 0;
+  padding:12px;
+  border-radius:8px;
+  background:#e8f5ed
+}
+footer{
+  background:#071b35;
+  color:white;
+  text-align:center;
+  padding:25px;
+  margin-top:30px
+}
+@media(max-width:600px){
+  .hero h1{font-size:28px}
+  .search{flex-direction:column}
+}
+</style>
+</head>
+
 <body>
-<header><div class="nav"><div class="logo">Naija<span>BizHub</span></div><nav>
-<button onclick="show('home')">Home</button><button onclick="show('businesses')">Businesses</button><button onclick="show('register')">List Your Business</button><button onclick="show('login')">Login</button></nav></div></header>
 
-<section id="home" class="screen active"><div class="hero"><div class="container">
-<h1>Find trusted businesses near you.</h1><p>Discover local businesses, services and deals — and connect directly with the people behind them.</p>
-<div class="search"><input id="homeSearch" placeholder="What are you looking for?"><input placeholder="City or area"><button class="btn gold" onclick="searchBusinesses()">Search</button></div>
-</div></div><div class="container section"><h2>Popular categories</h2><div class="grid" id="categoryGrid"></div></div>
-<div class="container section"><h2>Featured businesses</h2><div class="grid" id="featuredGrid"></div></div></section>
+<header>
+  <div class="nav">
+    <div class="logo">Naija<span>BizHub</span></div>
 
-<section id="businesses" class="screen"><div class="container section"><h2>Business Directory</h2>
-<div class="search" style="margin:15px 0 25px"><input id="directorySearch" placeholder="Search businesses"><select id="directoryCategory"><option value="">All categories</option></select><button class="btn primary" onclick="renderBusinesses()">Search</button></div><div class="grid" id="businessGrid"></div></div></section>
+    <nav>
+      <button onclick="showPage('home')">Home</button>
+      <button onclick="showPage('businesses')">Businesses</button>
+      <button onclick="showPage('register')">Register Business</button>
+    </nav>
+  </div>
+</header>
 
-<section id="profile" class="screen"><div class="container section"><button class="btn" onclick="show('businesses')">← Back</button><div id="profileContent" class="panel" style="margin-top:18px"></div></div></section>
 
-<section id="register" class="screen"><div class="container section"><div class="panel form"><h2>List Your Business</h2><p class="muted">Create your listing. Payment and verification will be connected in the production version.</p>
-<div class="two"><div class="field"><label>Business name *</label><input id="bizName"></div><div class="field"><label>Category *</label><select id="bizCategory"></select></div></div>
-<div class="field"><label>Description</label><textarea id="bizDescription" rows="4"></textarea></div>
-<div class="two"><div class="field"><label>Phone</label><input id="bizPhone"></div><div class="field"><label>WhatsApp</label><input id="bizWhatsapp"></div></div>
-<div class="two"><div class="field"><label>City</label><input id="bizCity" value="Owerri"></div><div class="field"><label>State</label><input id="bizState" value="Imo State"></div></div>
-<div class="field"><label>Plan</label><select id="bizPlan"><option>Free</option><option>Standard — ₦5,000/month</option><option>Premium — ₦15,000/month</option></select></div>
-<button class="btn primary" onclick="registerBusiness()">Submit Business</button><div id="registerNotice" class="notice hidden"></div></div></div></section>
+<!-- HOME -->
+<section id="home" class="screen active">
 
-<section id="login" class="screen"><div class="container section"><div class="panel form"><h2>Login</h2><div class="field"><label>Email</label><input id="loginEmail" type="email"></div><div class="field"><label>Password</label><input id="loginPassword" type="password"></div><button class="btn primary" onclick="login()">Login</button><div id="loginNotice" class="notice hidden"></div></div></div></section>
+  <div class="hero">
+    <h1>Find Trusted Businesses Near You</h1>
+    <p>Discover businesses and services across Nigeria.</p>
 
-<section id="dashboard" class="screen"><div class="container section"><h2>Business Owner Dashboard</h2><div class="stats">
-<div class="panel stat"><span class="muted">Profile views</span><strong>0</strong></div><div class="panel stat"><span class="muted">Enquiries</span><strong>0</strong></div><div class="panel stat"><span class="muted">WhatsApp clicks</span><strong>0</strong></div><div class="panel stat"><span class="muted">Plan</span><strong id="dashPlan">Free</strong></div></div>
-<div class="panel" style="margin-top:20px"><h3>My business</h3><p id="dashBusiness" class="muted">Register a business to see it here.</p></div></div></section>
+    <div class="search">
+      <input
+        id="homeSearch"
+        placeholder="Search for a business..."
+        oninput="searchBusinesses(this.value)"
+      >
+    </div>
+  </div>
+
+  <div class="container section">
+    <h2>Businesses on NaijaBizHub</h2>
+    <div id="homeBusinesses" class="grid">
+      <p class="muted">Loading businesses...</p>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- BUSINESSES -->
+<section id="businesses" class="screen">
+
+  <div class="container">
+
+    <h1>Browse Businesses</h1>
+
+    <div class="search">
+      <input
+        id="businessSearch"
+        placeholder="Search businesses, category or city..."
+        oninput="searchBusinesses(this.value)"
+      >
+    </div>
+
+    <div id="businessList" class="grid">
+      <p class="muted">Loading businesses...</p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- REGISTER -->
+<section id="register" class="screen">
+
+  <div class="container">
+
+    <h1>Register Your Business</h1>
+
+    <div class="form">
+
+      <div id="message"></div>
+
+      <div class="field">
+        <label>Business Name *</label>
+        <input id="name" placeholder="e.g. Naija Kitchen">
+      </div>
+
+      <div class="field">
+        <label>Category *</label>
+        <select id="category">
+          <option value="">Select category</option>
+          <option>Restaurant</option>
+          <option>Hotel</option>
+          <option>Fashion</option>
+          <option>Beauty</option>
+          <option>Supermarket</option>
+          <option>Electronics</option>
+          <option>Automobile</option>
+          <option>Construction</option>
+          <option>Education</option>
+          <option>Health</option>
+          <option>Technology</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Description</label>
+        <textarea id="description"
+          placeholder="Tell customers about your business"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Address</label>
+        <input id="address" placeholder="Business address">
+      </div>
+
+      <div class="field">
+        <label>Phone</label>
+        <input id="phone" placeholder="Phone number">
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input id="email" type="email" placeholder="Business email">
+      </div>
+
+      <div class="field">
+        <label>Website</label>
+        <input id="website" placeholder="https://example.com">
+      </div>
+
+      <div class="field">
+        <label>City *</label>
+        <input id="city" placeholder="e.g. Owerri">
+      </div>
+
+      <div class="field">
+        <label>State *</label>
+        <input id="state" placeholder="e.g. Imo State">
+      </div>
+
+      <button class="btn primary" onclick="registerBusiness()">
+        Register Business
+      </button>
+
+    </div>
+  </div>
+
+</section>
+
+
+<footer>
+  <p>© 2026 NaijaBizHub</p>
+  <p>Discover. Connect. Grow.</p>
+</footer>
+
 
 <script>
-const categories=["Restaurants","Hotels","Fashion","Beauty","Auto","Electronics","Construction","Health","Education","Events","Professional Services","Groceries"];
-let businesses=[
-{name:"Ahuoma Kitchen",category:"Restaurants",city:"Owerri",state:"Imo State",rating:4.8,verified:true,description:"Local catering and food services for events and private customers.",phone:"08000000000"},
-{name:"Westbrook Hotel",category:"Hotels",city:"Owerri",state:"Imo State",rating:4.6,verified:true,description:"Comfortable accommodation and hospitality services.",phone:"08000000001"},
-{name:"Naija Auto Care",category:"Auto",city:"Owerri",state:"Imo State",rating:4.7,verified:false,description:"Vehicle servicing, diagnostics and maintenance.",phone:"08000000002"},
-{name:"Style House",category:"Fashion",city:"Owerri",state:"Imo State",rating:4.5,verified:true,description:"Fashion and clothing services.",phone:"08000000003"}];
 
-function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");scrollTo(0,0);if(id==="businesses")renderBusinesses()}
-function card(b,i){return `<div class="card"><span class="tag">${b.category}</span><h3>${b.name}</h3><p>⭐ ${b.rating||"New"} ${b.verified?" · ✓ Verified":""}</p><p class="muted">📍 ${b.city}, ${b.state}</p><p>${b.description}</p><button class="btn primary" onclick="viewBusiness(${i})">View Business</button></div>`}
-function renderHome(){categoryGrid.innerHTML=categories.slice(0,8).map(c=>`<div class="card" onclick="categorySearch('${c}')"><h3>${c}</h3><p class="muted">Explore local businesses.</p></div>`).join("");featuredGrid.innerHTML=businesses.slice(0,4).map((b,i)=>card(b,i)).join("")}
-function renderBusinesses(){let q=(directorySearch.value||"").toLowerCase(),c=directoryCategory.value;let list=businesses.filter(b=>(!q||(b.name+" "+b.description+" "+b.category).toLowerCase().includes(q))&&(!c||b.category===c));businessGrid.innerHTML=list.length?list.map(b=>card(b,businesses.indexOf(b))).join(""):"<div class='panel'><h3>No businesses found</h3><p class='muted'>Try another search.</p></div>"}
-function viewBusiness(i){let b=businesses[i];profileContent.innerHTML=`<span class="tag">${b.category}</span><h1>${b.name}</h1><p>⭐ ${b.rating||"New"} ${b.verified?" · ✓ Verified Business":""}</p><p class="muted">📍 ${b.city}, ${b.state}</p><p>${b.description}</p><p><b>Phone:</b> ${b.phone||"Not provided"}</p><button class="btn primary" onclick="alert('Call: ${b.phone||"Not provided"}')">📞 Call</button> <button class="btn gold" onclick="alert('WhatsApp enquiry started')">💬 WhatsApp</button><button class="btn" onclick="alert('Directions will be connected to maps in production.')">📍 Directions</button><hr><h3>Services</h3><p class="muted">Services and prices will appear here in the production version.</p>`;show("profile")}
-function categorySearch(c){show("businesses");directoryCategory.value=c;renderBusinesses()}
-function searchBusinesses(){show("businesses");directorySearch.value=homeSearch.value;renderBusinesses()}
-function registerBusiness(){let name=bizName.value.trim();if(!name){alert("Please enter your business name.");return}let b={name,category:bizCategory.value,city:bizCity.value,state:bizState.value,rating:0,verified:false,description:bizDescription.value,phone:bizPhone.value};businesses.push(b);localStorage.setItem("nbh_businesses",JSON.stringify(businesses));registerNotice.classList.remove("hidden");registerNotice.innerHTML="<b>Business submitted successfully.</b><br>Your listing is pending admin verification.";dashBusiness.textContent=name+" — "+b.category;dashPlan.textContent=bizPlan.value.split(" —")[0];setTimeout(()=>show("dashboard"),700)}
-function login(){if(!loginEmail.value){alert("Enter your email.");return}show("dashboard")}
-function setup(){let saved=localStorage.getItem("nbh_businesses");if(saved)businesses=JSON.parse(saved);categories.forEach(c=>{directoryCategory.innerHTML+=`<option>${c}</option>`;bizCategory.innerHTML+=`<option>${c}</option>`});renderHome();renderBusinesses()}setup();
-</script></body></html>
+/* SUPABASE CONNECTION */
+
+const SUPABASE_URL =
+"https://doflapkovhfudybflhgx.supabase.co";
+
+const SUPABASE_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvZmxhcGtvdmhmdWR5YmZsaGd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMjI2MzksImV4cCI6MjEwMTY5ODYzOX0.P-KtWFtcgxxtUIkEtAdZkbTFAC3Oio623pIwHmkvFZY";
+
+const db = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+/* PAGE NAVIGATION */
+
+function showPage(page){
+
+  document.querySelectorAll(".screen")
+    .forEach(x => x.classList.remove("active"));
+
+  document.getElementById(page)
+    .classList.add("active");
+
+  if(page === "businesses"){
+    loadBusinesses();
+  }
+
+}
+
+
+/* LOAD BUSINESSES */
+
+let allBusinesses = [];
+
+async function loadBusinesses(){
+
+  const { data, error } = await db
+    .from("Business")
+    .select("*")
+    .order("created_at", {ascending:false});
+
+  if(error){
+
+    console.error(error);
+
+    document.getElementById("businessList").innerHTML =
+      "<p>Unable to load businesses.</p>";
+
+    return;
+  }
+
+  allBusinesses = data || [];
+
+  displayBusinesses(allBusinesses);
+
+  displayHomeBusinesses(allBusinesses);
+}
+
+
+/* DISPLAY BUSINESS CARDS */
+
+function businessCard(b){
+
+  return `
+    <div class="card">
+
+      <h3>${escapeHTML(b.name || "Unnamed Business")}</h3>
+
+      <p><strong>${escapeHTML(b.category || "")}</strong></p>
+
+      <p>${escapeHTML(b.description || "No description available.")}</p>
+
+      <p class="muted">
+        📍 ${escapeHTML(b.city || "")},
+        ${escapeHTML(b.state || "")}
+      </p>
+
+      ${
+        b.phone
+        ? `<p>📞 ${escapeHTML(b.phone)}</p>`
+        : ""
+      }
+
+      ${
+        b.email
+        ? `<p>✉️ ${escapeHTML(b.email)}</p>`
+        : ""
+      }
+
+      ${
+        b.website
+        ? `<p>
+          <a href="${escapeHTML(b.website)}" target="_blank">
+          Visit website
+          </a>
+        </p>`
+        : ""
+      }
+
+      ${
+        b.is_verified
+        ? `<p>✅ Verified Business</p>`
+        : ""
+      }
+
+    </div>
+  `;
+}
+
+
+function displayBusinesses(list){
+
+  const box = document.getElementById("businessList");
+
+  if(!list.length){
+
+    box.innerHTML =
+      "<p class='muted'>No businesses found yet.</p>";
+
+    return;
+  }
+
+  box.innerHTML =
+    list.map(businessCard).join("");
+}
+
+
+function displayHomeBusinesses(list){
+
+  const box = document.getElementById("homeBusinesses");
+
+  const latest = list.slice(0,6);
+
+  if(!latest.length){
+
+    box.innerHTML =
+      "<p class='muted'>No businesses registered yet.</p>";
+
+    return;
+  }
+
+  box.innerHTML =
+    latest.map(businessCard).join("");
+}
+
+
+/* SEARCH */
+
+function searchBusinesses(term){
+
+  term = term.toLowerCase().trim();
+
+  const results = allBusinesses.filter(b => {
+
+    return (
+      (b.name || "").toLowerCase().includes(term) ||
+      (b.category || "").toLowerCase().includes(term) ||
+      (b.city || "").toLowerCase().includes(term) ||
+      (b.state || "").toLowerCase().includes(term)
+    );
+
+  });
+
+  displayBusinesses(results);
+}
+
+
+/* REGISTER BUSINESS */
+
+async function registerBusiness(){
+
+  const message = document.getElementById("message");
+
+  const business = {
+
+    name: document.getElementById("name").value.trim(),
+
+    category:
+      document.getElementById("category").value.trim(),
+
+    description:
+      document.getElementById("description").value.trim(),
+
+    address:
+      document.getElementById("address").value.trim(),
+
+    phone:
+      document.getElementById("phone").value.trim(),
+
+    email:
+      document.getElementById("email").value.trim(),
+
+    website:
+      document.getElementById("website").value.trim(),
+
+    city:
+      document.getElementById("city").value.trim(),
+
+    state:
+      document.getElementById("state").value.trim(),
+
+    is_verified:false
+
+  };
+
+
+  if(!business.name ||
+     !business.category ||
+     !business.city ||
+     !business.state){
+
+    message.innerHTML =
+      "<div class='message'>Please fill in the required fields.</div>";
+
+    return;
+  }
+
+
+  message.innerHTML =
+    "<div class='message'>Registering business...</div>";
+
+
+  const { data, error } = await db
+    .from("Business")
+    .insert([business])
+    .select();
+
+
+  if(error){
+
+    console.error(error);
+
+    message.innerHTML =
+      "<div class='message'>Error: " +
+      escapeHTML(error.message) +
+      "</div>";
+
+    return;
+  }
+
+
+  message.innerHTML =
+    "<div class='message'>✅ Business registered successfully!</div>";
+
+
+  document.getElementById("name").value="";
+  document.getElementById("category").value="";
+  document.getElementById("description").value="";
+  document.getElementById("address").value="";
+  document.getElementById("phone").value="";
+  document.getElementById("email").value="";
+  document.getElementById("website").value="";
+  document.getElementById("city").value="";
+  document.getElementById("state").value="";
+
+
+  loadBusinesses();.from("Business")
+
+}
+
+
+/* SECURITY */
+
+function escapeHTML(value){
+
+  return String(value)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* START */
+
+loadBusinesses();
+
+</script>
+
+</body>
+</html>
